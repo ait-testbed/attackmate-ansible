@@ -1,6 +1,6 @@
 # Ansible-Role: AttackMate
 
-This ansible role downloads attackmate from the official repository
+This ansible role downloads [AttackMate](https://github.com/ait-aecid/attackmate) from the official repository
 using git and installs all dependencies in a virtual environment.
 It is further possible to roll out playbooks.
 
@@ -45,6 +45,9 @@ It is further possible to roll out playbooks.
         attackmate_version: development
         attackmate_msf_server: localhost
         attackmate_msf_passwd: hackerman
+        attackmate_playbooks:
+          - upgradeshell.j2
+          - attackchain.j2
 ```
 
 ## License
