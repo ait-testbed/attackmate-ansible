@@ -1,0 +1,77 @@
+- name: Install packages for sliverfix
+  become: true
+  ansible.builtin.package:
+    name: "{{ attackmate_dev_packages }}"
+  tags:
+    - install
+    - dependencies
+
+- name: Git checkout grpc
+  ansible.builtin.git:
+    repo: "https://github.com/grpc/grpc"
+    dest: "{{ attackmate_grpc_dest }}"
+    version: "master"
+  tags:
+    - install
+    - git
+    - grpc
+
+- name: Install grpc requirements
+  ansible.builtin.pip:
+    requirements: "requirements.txt"
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: Uninstall protobuf
+  ansible.builtin.pip:
+    name: protobuf
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+    extra_args: "--yes"
+    state: absent
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: Uninstall grpcio-tools
+  ansible.builtin.pip:
+    name: grpcio-tools
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+    extra_args: "--yes"
+    state: absent
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: Compile grpc
+  ansible.builtin.shell:
+    chdir: "{{ attackmate_grpc_dest }}"
+    cmd: ". {{ attackmate_dest }}/venv/bin/activate && GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True pip install --use-pep517 --no-input ."
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: Remove grpc dev-files
+  ansible.builtin.shell:
+    cmd: "test -d {{ attackmate_grpc_dest }} && rm -rf {{ attackmate_grpc_dest }}"
+  tags:
+    - install
+    - pip
+    - grpc
+
+
+- name: Lock sliverfix
+  ansible.builtin.shell:
+    cmd: "touch {{ attackmate_dest }}/venv/.sliverfix"
+  tags:
+    - install
+    - pip
+    - grpc

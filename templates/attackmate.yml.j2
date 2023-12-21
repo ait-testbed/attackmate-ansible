@@ -1,0 +1,13 @@
+###
+{% if attackmate_sliver_config is defined %}
+sliver_config:
+  config_file: {{ attackmate_sliver_config }}
+{% endif %}
+
+{% if attackmate_msf_server is defined %}
+msf_config:
+  server: {{ attackmate_msf_server }}
+  {% if attackmate_msf_passwd %}
+  password: {{ attackmate_msf_passwd }}
+  {% endif %}
+{% endif %}

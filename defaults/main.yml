@@ -1,0 +1,32 @@
+---
+# defaults file for ansible-attackmate
+attackmate_packages:
+  - python3
+  - python3-pip
+  - git
+  - python3-venv
+  - libmagic1
+
+attackmate_dev_packages:
+  - build-essential
+  - python3-dev
+  - libssl-dev
+
+attackmate_url: "https://github.com/ait-aecid/attackmate.git"
+attackmate_version: "main"
+attackmate_shared_dir: "/usr/local/share"
+attackmate_dest: "{{ attackmate_shared_dir }}/attackmate"
+attackmate_sliverfix: True
+attackmate_grpc_dest: "{{ attackmate_shared_dir }}/grpc"
+attackmate_bindir: "/usr/local/bin"
+attackmate_tmux: True
+attackmate_tmux_session: "attackmate"
+attackmate_tmux_window: "attackmate"
+attackmate_config_dir: "/etc/attackmate"
+attackmate_playbook_path: "{{ attackmate_config_dir }}/playbooks"
+attackmate_playbooks: []
+attackmate_config_tpl: "attackmate.yml.j2"
+# attackmate_sliver_config: "/home/aecid/.sliver-client/configs/aecid_localhost.cfg"
+# attackmate_msf_server: localhost
+# attackmate_msf_passwd: hackerman
+

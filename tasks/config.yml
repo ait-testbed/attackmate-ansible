@@ -1,0 +1,22 @@
+- name: Ensure playbooks path
+  ansible.builtin.file:
+    path: "{{ attackmate_playbook_path }}"
+    state: directory
+    recurse: true
+  tags:
+    - playbooks
+
+- name: Configure attackmate
+  ansible.builtin.template:
+    src: "{{ attackmate_config_tpl }}"
+    dest: "/etc/attackmate.yml"
+    mode: '0644'
+
+- name: Copy playbooks
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ attackmate_playbook_path }}/{{ item }}.yml"
+    mode: '0644'
+  with_items: "{{ attackmate_playbooks }}"
+  tags:
+    - playbooks

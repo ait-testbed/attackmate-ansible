@@ -1,0 +1,74 @@
+---
+- name: Include Debian Variables
+  include_vars: debian.yml
+  when: ansible_distribution_file_variety == "Debian"
+  tags: vars
+
+# tasks file for ansible-attackmate
+- name: Install packages for attackmate
+  become: true
+  ansible.builtin.package:
+    name: "{{ attackmate_packages }}"
+  tags:
+    - install
+    - dependencies
+
+- name: Install tmux
+  become: true
+  ansible.builtin.package:
+    name: tmux
+  when: attackmate_tmux
+  tags:
+    - install
+    - tmux
+
+- name: Git checkout
+  ansible.builtin.git:
+    repo: "{{ attackmate_url }}"
+    dest: "{{ attackmate_dest }}"
+    version: "{{ attackmate_version }}"
+  tags:
+    - install
+    - git
+
+- name: Pip install attackmate
+  ansible.builtin.pip:
+    name: "."
+    chdir: "{{ attackmate_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+  tags:
+    - install
+    - pip
+
+- name: Deploy attackmate-tmux
+  ansible.builtin.template:
+    src: attackmate-tmux.j2
+    dest: "{{ attackmate_bindir }}/attackmate-tmux"
+    mode: '0755'
+  when: attackmate_tmux
+  tags:
+    - install
+    - tmux
+
+- name: Include config
+  ansible.builtin.include_tasks: 
+    file: "config.yml"
+    apply:
+      tags:
+        - config
+
+- name: Test sliverfix-lock
+  ansible.builtin.shell:
+    cmd: "test -e {{ attackmate_dest }}/venv/.sliverfix"
+  register: sliverfix_result
+  failed_when: sliverfix_result.stderr == "Error"
+
+- name: Include sliverfix
+  ansible.builtin.include_tasks: 
+    file: "sliverfix.yml"
+    apply:
+      tags:
+        - sliverfix
+  when: attackmate_sliverfix and sliverfix_result.rc == 1
+  tags:
+    - always

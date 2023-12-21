@@ -1,0 +1,13 @@
+attackmate_packages:
+  - python3
+  - python3-pip
+  - git
+  - python3-venv
+  - libmagic1
+
+attackmate_dev_packages:
+  - build-essential
+  - python3-dev
+  - libssl-dev
+
+
