@@ -59,6 +59,16 @@
     - pip
     - grpc
 
+- name: Install protobuf
+  ansible.builtin.pip:
+    name: protobuf
+    chdir: "{{ attackmate_grpc_dest }}"
+    virtualenv: "{{ attackmate_dest }}/venv"
+  tags:
+    - install
+    - pip
+    - grpc
+
 - name: Remove grpc dev-files
   ansible.builtin.shell:
     cmd: "test -d {{ attackmate_grpc_dest }} && rm -rf {{ attackmate_grpc_dest }}"
