@@ -21,7 +21,7 @@ attackmate_sliverfix: True
 attackmate_grpc_dest: "{{ attackmate_shared_dir }}/grpc"
 attackmate_bindir: "/usr/local/bin"
 attackmate_tmux: True
-attackmate_tmux_session: "attackmate"
+attackmate_tmux_session: "default"
 attackmate_tmux_window: "attackmate"
 attackmate_config_dir: "/etc/attackmate"
 attackmate_playbook_path: "{{ attackmate_config_dir }}/playbooks"
