@@ -1,0 +1,7 @@
+#!/bin/sh
+
+project_path="{{ attackmate_dest }}"
+
+. $project_path/venv/bin/activate
+attackmate $@
+deactivate
