@@ -50,6 +50,11 @@ It is further possible to roll out playbooks.
           - attackchain.j2
 ```
 
+This role installs to executables:
+
+* /usr/local/bin/attackm8: a wrapper for attackmate that uses the virtual environment
+* /usr/local/bin/attackmate-tmux: a wrapper that executes attackmate in a tmux-session
+
 ## License
 
 GPL-3.0
