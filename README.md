@@ -52,8 +52,8 @@ It is further possible to roll out playbooks.
 
 This role installs to executables:
 
-* /usr/local/bin/attackm8: a wrapper for attackmate that uses the virtual environment
-* /usr/local/bin/attackmate-tmux: a wrapper that executes attackmate in a tmux-session
+* **/usr/local/bin/attackm8**: a wrapper for attackmate that uses the virtual environment
+* **/usr/local/bin/attackmate-tmux**: a wrapper that executes attackmate in a tmux-session
 
 ## License
 
