@@ -1,3 +1,43 @@
+- name: Download the GRPC patch if possible
+  ansible.builtin.get_url:
+    url: "{{ grpc_patch_url }}"
+    dest: "/tmp"
+    mode: '0644'
+  register: download_result
+  ignore_errors: true
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: Install grpc patch if available
+  ansible.builtin.shell:
+    chdir: "/tmp"
+    cmd: ". {{ attackmate_dest }}/venv/bin/activate && pip install current"
+  when: download_result.status_code | default(404) == 200
+  tags:
+    - install
+    - pip
+    - grpc
+
+- name: Grpc patch INFO
+  ansible.builtin.debug:
+    msg:
+    - "No grpc patch available falling back to compile locally"
+    - "This will take a while depending on your system"
+  when: download_result.status_code | default(403) != 200
+
+- name: Git checkout grpc
+  ansible.builtin.git:
+    repo: "https://github.com/grpc/grpc"
+    dest: "{{ attackmate_grpc_dest }}"
+    version: "master"
+  when: download_result.status_code | default(403) != 200
+  tags:
+    - install
+    - git
+    - grpc
+
 - name: Install packages for sliverfix
   become: true
   ansible.builtin.package:
@@ -5,16 +45,7 @@
   tags:
     - install
     - dependencies
-
-- name: Git checkout grpc
-  ansible.builtin.git:
-    repo: "https://github.com/grpc/grpc"
-    dest: "{{ attackmate_grpc_dest }}"
-    version: "master"
-  tags:
-    - install
-    - git
-    - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Install grpc requirements
   ansible.builtin.pip:
@@ -25,6 +56,7 @@
     - install
     - pip
     - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Uninstall protobuf
   ansible.builtin.pip:
@@ -37,6 +69,7 @@
     - install
     - pip
     - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Uninstall grpcio-tools
   ansible.builtin.pip:
@@ -49,6 +82,7 @@
     - install
     - pip
     - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Compile grpc
   ansible.builtin.shell:
@@ -58,6 +92,7 @@
     - install
     - pip
     - grpc
+  when: download_result.status_code | default(404) != 200
 
 - name: Install protobuf
   ansible.builtin.pip:
@@ -76,7 +111,7 @@
     - install
     - pip
     - grpc
-
+  when: download_result.status_code | default(404) != 200
 
 - name: Lock sliverfix
   ansible.builtin.shell:

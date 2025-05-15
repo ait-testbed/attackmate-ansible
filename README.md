@@ -55,6 +55,28 @@ This role installs to executables:
 * **/usr/local/bin/attackm8**: a wrapper for attackmate that uses the virtual environment
 * **/usr/local/bin/attackmate-tmux**: a wrapper that executes attackmate in a tmux-session
 
+## Role testing with molecule
+
+If you want to test this role locally using Molecule (https://ansible.readthedocs.io/projects/molecule/) and Docker we provided a Molecule configuration. 
+
+Requirements to run Molecule:
+
+1. Install docker: https://docs.docker.com/engine/install/ubuntu/ (Make sure you have permission to run Docker commands (i.e., your user is in the docker group))
+2. Install uv:
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   uv venv
+   source .venv/bin/activate
+   ```
+3. Install molecule and ansible:
+   ```bash
+   uv pip install molecule ansible molecule-docker
+   ```
+4. run 
+   ```bash
+   molecule test
+   ```
+
 ## License
 
 GPL-3.0
