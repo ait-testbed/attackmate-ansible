@@ -25,4 +25,5 @@ then
 	tmux send-keys -t "$session" "source ${project_path}/venv/bin/activate" Enter
 fi
 
-tmux send-keys -t "$pane" "attackmate $@" Enter
+full_command="attackmate $*"
+tmux send-keys -t "$pane" "${full_command}" Enter
