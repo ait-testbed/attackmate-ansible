@@ -14,3 +14,10 @@ msf_config:
   password: {{ attackmate_msf_passwd }}
   {% endif %}
 {% endif %}
+
+
+{%- if command_delay is defined %}
+
+cmd_config:
+  command_delay: {{ command_delay }}
+{% endif %}

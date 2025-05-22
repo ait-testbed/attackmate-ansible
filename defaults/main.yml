@@ -13,8 +13,8 @@ attackmate_dev_packages:
   - python3-dev
   - libssl-dev
 
-attackmate_url: "https://github.com/thorinaboenke/attackmate.git"
-attackmate_version: "feature_62_vnc_executor"
+attackmate_url: "https://github.com/ait-testbed/attackmate.git"
+attackmate_version: "main"
 attackmate_shared_dir: "/usr/local/share"
 attackmate_dest: "{{ attackmate_shared_dir }}/attackmate"
 attackmate_sliverfix: True
