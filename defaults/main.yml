@@ -13,7 +13,7 @@ attackmate_dev_packages:
   - python3-dev
   - libssl-dev
 
-attackmate_url: "https://github.com/ait-aecid/attackmate.git"
+attackmate_url: "https://github.com/ait-testbed/attackmate.git"
 attackmate_version: "main"
 attackmate_shared_dir: "/usr/local/share"
 attackmate_dest: "{{ attackmate_shared_dir }}/attackmate"

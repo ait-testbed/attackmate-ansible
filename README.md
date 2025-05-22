@@ -31,6 +31,7 @@ It is further possible to roll out playbooks.
 | attackmate_sliver_config       | path | **None** | Path to the generated sliver-config. (only needed for sliver-commands) |
 | attackmate_msf_server          | hostname | **None** | Hostname of the Metasploit rpcd. (only needed for msf-commands) |
 | attackmate_msf_passwd          | password | **None** | Password for the Metasploit rpcd. (only needed for msf-commands) |
+| command_delay                  | float | **None** | delay in seconds before commands for the CommandConfig |
 
 ## Example Playbook
 
@@ -48,6 +49,7 @@ It is further possible to roll out playbooks.
         attackmate_playbooks:
           - upgradeshell.j2
           - attackchain.j2
+        command_delay: 2
 ```
 
 This role installs to executables:
