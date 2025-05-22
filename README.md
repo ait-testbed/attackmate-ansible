@@ -66,7 +66,6 @@ Requirements to run Molecule:
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    uv venv
-   source .venv/bin/activate
    ```
 3. Install molecule and ansible:
    ```bash
