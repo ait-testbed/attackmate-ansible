@@ -74,7 +74,7 @@ Requirements to run Molecule:
    ```
 4. run 
    ```bash
-   molecule test
+   uv run molecule test
    ```
 
 ## License
