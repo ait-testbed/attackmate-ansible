@@ -32,9 +32,11 @@ attackmate_config_tpl: "attackmate.yml.j2"
 # attackmate_msf_passwd: hackerman
 
 attackmate_playwright: True
+attackmate_playwright_browser_cache: "/usr/local/share/attackmate/ms-playwright" 
 attackmate_playwright_system_packages:  # System packages required by Playwright browsers
   - libnss3
   - libnspr4
   - libasound2t64
 attackmate_playwright_pip_packages:  # Python packages to install into the AttackMate venv
   - playwright
+
