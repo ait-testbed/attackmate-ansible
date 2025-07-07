@@ -1,0 +1,28 @@
+name: Molecule Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  molecule:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv and dependencies
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv venv
+          uv pip install molecule ansible molecule-docker
+
+      - name: Run Molecule tests
+        run: |
+          uv run molecule test
