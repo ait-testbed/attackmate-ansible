@@ -95,3 +95,11 @@
   tags:
     - always
     - molecule-idempotence-notest
+
+- name: Include Playwright setup
+  ansible.builtin.include_tasks:
+    file: "playwright.yml"
+    apply:
+      tags:
+        - playwright
+  when: attackmate_playwright
