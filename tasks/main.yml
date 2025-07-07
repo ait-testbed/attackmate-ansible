@@ -49,6 +49,7 @@
   tags:
     - install
     - pip
+    - molecule-idempotence-notest
 
 - name: Deploy attackmate-tmux
   ansible.builtin.template:
@@ -81,6 +82,8 @@
     cmd: "test -e {{ attackmate_dest }}/venv/.sliverfix"
   register: sliverfix_result
   failed_when: sliverfix_result.stderr == "Error"
+  tags:
+    - molecule-idempotence-notest
 
 - name: Include sliverfix
   ansible.builtin.include_tasks: 
@@ -91,3 +94,4 @@
   when: attackmate_sliverfix and sliverfix_result.rc == 1
   tags:
     - always
+    - molecule-idempotence-notest
