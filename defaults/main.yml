@@ -6,7 +6,7 @@ attackmate_packages:
   - python3-virtualenv
   - git
   - python3-venv
-  - libmagic-dev
+  - libmagic1
 
 attackmate_dev_packages:
   - build-essential
