@@ -36,7 +36,7 @@
 - name: Install system dependencies via playwright install-deps
   ansible.builtin.command: "{{ attackmate_dest }}/venv/bin/playwright install-deps"
   become: true
-  when: attackmate_playwright
+  when: attackmate_playwright and ansible_distribution != "Kali"
   tags:
     - install
     - playwright
@@ -46,14 +46,13 @@
   ansible.builtin.file:
     path: "{{ attackmate_playwright_browser_cache }}"
     state: directory
-    owner: "{{ ansible_user | default('ubuntu') }}"
-    group: "{{ ansible_user | default('ubuntu') }}"
-    mode: '0755'
+    mode: '1777'
   when: attackmate_playwright
   tags:
     - playwright
 
 - name: Install Playwright browsers (shared path)
+  become: true
   ansible.builtin.command: "{{ attackmate_dest }}/venv/bin/playwright install"
   args:
     chdir: "{{ attackmate_dest }}"

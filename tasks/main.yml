@@ -41,11 +41,26 @@
     - install
     - git
 
+- name: Pre-seed venv with compatible pip tools
+  ansible.builtin.pip:
+    virtualenv: "{{ attackmate_dest }}/venv"
+    name:
+      - "pip<25"            # keep a pip that still allows legacy builds
+      - "setuptools<66"     # 65.5.1 keeps install_layout
+      - "wheel<0.42"
+    state: latest
+    extra_args: --upgrade
+  tags:
+    - install
+    - pip
+
+
 - name: Pip install attackmate
   ansible.builtin.pip:
     name: "."
     chdir: "{{ attackmate_dest }}"
     virtualenv: "{{ attackmate_dest }}/venv"
+    virtualenv_python: "{{ attackmate_python_interpreter | default(None) }}"
   tags:
     - install
     - pip
