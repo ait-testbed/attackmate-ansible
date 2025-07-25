@@ -40,6 +40,7 @@
   tags:
     - install
     - playwright
+    - molecule-idempotence-notest
 
 - name: Ensure shared Playwright browser cache dir exists
   become: true
@@ -62,3 +63,4 @@
   tags:
     - install
     - playwright
+    - molecule-idempotence-notest
