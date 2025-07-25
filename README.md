@@ -60,7 +60,9 @@ This role installs to executables:
 
 ## Role testing with molecule
 
-If you want to test this role locally using Molecule (https://ansible.readthedocs.io/projects/molecule/) and Docker we provided a Molecule configuration. 
+### Role testing locally
+
+If you want to test this role locally using Molecule (https://ansible.readthedocs.io/projects/molecule/) and Docker we provided a Molecule configuration.
 
 Requirements to run Molecule:
 
@@ -77,7 +79,11 @@ Requirements to run Molecule:
 4. run 
    ```bash
    uv run molecule test
+
    ```
+### Role testing with github action
+
+Additionally a github action for molecule tests is being triggered on push and pull requests.
 
 ## License
 
