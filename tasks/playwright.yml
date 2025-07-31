@@ -1,0 +1,66 @@
+---
+# Update apt cache so we get the latest packages
+- name: Update apt cache for Playwright
+  become: true
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: attackmate_playwright
+  tags:
+    - install
+    - playwright
+
+# Install the system‐level libraries Playwright needs
+- name: Install system dependencies for Playwright
+  become: true
+  ansible.builtin.package:
+    name: "{{ attackmate_playwright_system_packages }}"
+    state: present
+  when: attackmate_playwright
+  tags:
+    - install
+    - playwright
+
+# Install the Python Playwright package into our virtualenv
+- name: Install Playwright Python package in venv
+  become: true
+  ansible.builtin.pip:
+    name: "{{ attackmate_playwright_pip_packages }}"
+    chdir: "{{ attackmate_dest }}"
+    executable: "{{ attackmate_dest }}/venv/bin/pip"
+  when: attackmate_playwright
+  tags:
+    - install
+    - playwright
+
+- name: Install system dependencies via playwright install-deps
+  ansible.builtin.command: "{{ attackmate_dest }}/venv/bin/playwright install-deps"
+  become: true
+  when: attackmate_playwright and ansible_distribution != "Kali"
+  tags:
+    - install
+    - playwright
+    - molecule-idempotence-notest
+
+- name: Ensure shared Playwright browser cache dir exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ attackmate_playwright_browser_cache }}"
+    state: directory
+    mode: '1777'
+  when: attackmate_playwright
+  tags:
+    - playwright
+
+- name: Install Playwright browsers (shared path)
+  become: true
+  ansible.builtin.command: "{{ attackmate_dest }}/venv/bin/playwright install"
+  args:
+    chdir: "{{ attackmate_dest }}"
+  environment:
+    PLAYWRIGHT_BROWSERS_PATH: "{{ attackmate_playwright_browser_cache }}"
+  when: attackmate_playwright
+  tags:
+    - install
+    - playwright
+    - molecule-idempotence-notest
