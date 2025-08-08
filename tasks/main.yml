@@ -1,4 +1,8 @@
 ---
+- name: Set uv_bin variable
+  set_fact:
+   uv_bin: "/usr/local/bin/uv"
+
 - name: Include Debian Variables
   include_vars: debian.yml
   when: ansible_distribution == "Debian"
@@ -14,7 +18,24 @@
   when: ansible_distribution == "Kali"
   tags: vars
 
-# tasks file for ansible-attackmate
+- name: Install curl
+  become: true
+  ansible.builtin.package:
+    name: curl
+  tags:
+    - install
+    - dependencies
+
+- name: Install uv (Python package manager)
+  become: true
+  ansible.builtin.shell: |
+    curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="/usr/local/bin" sh
+  args:
+    creates: "{{ uv_bin }}"
+  tags:
+    - install
+    - grpc
+
 - name: Install packages for attackmate
   become: true
   ansible.builtin.package:
@@ -40,16 +61,43 @@
   tags:
     - install
     - git
+    - molecule-idempotence-notest
 
-- name: Pip install attackmate
-  ansible.builtin.pip:
-    name: "."
+- name: Create virtual environment with uv
+  become: true
+  ansible.builtin.shell:
     chdir: "{{ attackmate_dest }}"
-    virtualenv: "{{ attackmate_dest }}/venv"
+    cmd: "uv venv"
+  args:
+    creates: "{{ attackmate_dest }}/.venv"
+  tags:
+    - install
+    - pip
+
+- name: Prepare AttackMate package with uv
+  become: true
+  ansible.builtin.shell:
+    chdir: "{{ attackmate_dest }}"
+    cmd: "uv add --dev ."
+  args:
+    creates: "{{ attackmate_dest }}/dist"
   tags:
     - install
     - pip
     - molecule-idempotence-notest
+
+- name: Create symlinks for attackm8 and attackmate executables
+  become: true
+  ansible.builtin.file:
+    src: "{{ attackmate_dest }}/.venv/bin/attackmate"
+    dest: "/usr/local/bin/{{ item }}"
+    state: link
+    force: true
+  loop:
+    - attackm8
+    - attackmate
+  tags:
+    - install
 
 - name: Deploy attackmate-tmux
   ansible.builtin.template:
@@ -61,14 +109,14 @@
     - install
     - tmux
 
-- name: Deploy venv-wrapper
-  ansible.builtin.template:
-    src: attackmate-venv.j2
-    dest: "{{ attackmate_bindir }}/attackm8"
-    mode: '0755'
-  tags:
-    - install
-    - venv
+#- name: Deploy venv-wrapper
+#  ansible.builtin.template:
+#    src: attackmate-venv.j2
+#    dest: "{{ attackmate_bindir }}/attackm8"
+#    mode: '0755'
+#  tags:
+#    - install
+#    - venv
 
 - name: Include config
   ansible.builtin.include_tasks: 
@@ -95,6 +143,7 @@
   tags:
     - always
     - molecule-idempotence-notest
+
 
 - name: Include Playwright setup
   ansible.builtin.include_tasks:
