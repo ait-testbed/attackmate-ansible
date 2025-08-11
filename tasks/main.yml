@@ -78,7 +78,7 @@
   become: true
   ansible.builtin.shell:
     chdir: "{{ attackmate_dest }}"
-    cmd: "uv add --dev ."
+    cmd: "uv pip install --python .venv/bin/python ."
   args:
     creates: "{{ attackmate_dest }}/dist"
   tags:
