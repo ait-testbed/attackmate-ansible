@@ -3,6 +3,6 @@
 project_path="{{ attackmate_dest }}"
 export PLAYWRIGHT_BROWSERS_PATH="{{ attackmate_playwright_browser_cache }}"
 
-. $project_path/venv/bin/activate
+. $project_path/.venv/bin/activate
 attackmate $@
 deactivate
