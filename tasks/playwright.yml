@@ -21,21 +21,21 @@
     - install
     - playwright
 
-# Install the Python Playwright package into our virtualenv
-- name: Install Playwright Python package in venv
+# Install the Python Playwright package into our virtualenv using uv
+- name: Install Playwright Python package in venv (uv)
   become: true
-  ansible.builtin.pip:
-    name: "{{ attackmate_playwright_pip_packages }}"
+  ansible.builtin.shell:
     chdir: "{{ attackmate_dest }}"
-    executable: "{{ attackmate_dest }}/venv/bin/pip"
+    cmd: "uv pip install --python .venv/bin/python {{ attackmate_playwright_pip_packages | join(' ') }}"
   when: attackmate_playwright
   tags:
     - install
     - playwright
+    - molecule-idempotence-notest
 
 - name: Install system dependencies via playwright install-deps
-  ansible.builtin.command: "{{ attackmate_dest }}/venv/bin/playwright install-deps"
   become: true
+  ansible.builtin.command: "{{ attackmate_dest }}/.venv/bin/playwright install-deps"
   when: attackmate_playwright and ansible_distribution != "Kali"
   tags:
     - install
@@ -54,13 +54,22 @@
 
 - name: Install Playwright browsers (shared path)
   become: true
-  ansible.builtin.command: "{{ attackmate_dest }}/venv/bin/playwright install"
-  args:
+  ansible.builtin.shell:
     chdir: "{{ attackmate_dest }}"
-  environment:
-    PLAYWRIGHT_BROWSERS_PATH: "{{ attackmate_playwright_browser_cache }}"
+    cmd: 'PLAYWRIGHT_BROWSERS_PATH="{{ attackmate_playwright_browser_cache }}" {{ attackmate_dest }}/.venv/bin/playwright install'
   when: attackmate_playwright
   tags:
     - install
     - playwright
     - molecule-idempotence-notest
+
+- name: Export PLAYWRIGHT_BROWSERS_PATH system-wide
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/profile.d/playwright_browsers_path.sh
+    content: |
+      export PLAYWRIGHT_BROWSERS_PATH="{{ attackmate_playwright_browser_cache }}"
+    mode: '0644'
+  tags:
+    - playwright
+    - environment

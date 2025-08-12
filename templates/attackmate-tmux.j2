@@ -22,7 +22,7 @@ if [ $? == "1" ]
 then
 	echo "Create window"
 	tmux new-window -n ${window}
-	tmux send-keys -t "$session" "source ${project_path}/venv/bin/activate" Enter
+	tmux send-keys -t "$session" Enter
 fi
 
 full_command="attackmate $*"
