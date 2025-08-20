@@ -3,21 +3,6 @@
   set_fact:
    uv_bin: "/usr/local/bin/uv"
 
-- name: Include Debian Variables
-  include_vars: debian.yml
-  when: ansible_distribution == "Debian"
-  tags: vars
-
-- name: Include Ubuntu Variables
-  include_vars: ubuntu.yml
-  when: ansible_distribution == "Ubuntu"
-  tags: vars
-
-- name: Include Kali Variables
-  include_vars: kali.yml
-  when: ansible_distribution == "Kali"
-  tags: vars
-
 - name: Install curl
   become: true
   ansible.builtin.package:
