@@ -21,6 +21,10 @@ platforms:
    image: debian:12
    ansible_user: root
    pre_build_image: true
+ - name: instance-debian13
+   image: debian:13
+   ansible_user: root
+   pre_build_image: true
 provisioner:
   name: ansible
   ANSIBLE_ROLES_PATH: "/home/ubuntu/aecid_roles/"

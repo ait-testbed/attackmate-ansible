@@ -21,6 +21,13 @@
     - install
     - playwright
 
+- name: Install Playwright browser dependencies for Debian 13
+  apt:
+    name: "{{ playwright_dependencies_debian13 }}"
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "13"
+
 # Install the Python Playwright package into our virtualenv using uv
 - name: Install Playwright Python package in venv (uv)
   become: true
@@ -34,9 +41,8 @@
     - molecule-idempotence-notest
 
 - name: Install system dependencies via playwright install-deps
-  become: true
-  ansible.builtin.command: "{{ attackmate_dest }}/.venv/bin/playwright install-deps"
-  when: attackmate_playwright and ansible_distribution != "Kali"
+  command: /usr/local/share/attackmate/.venv/bin/playwright install-deps
+  when: (ansible_distribution != "Debian" or ansible_distribution_major_version != "13") and ansible_distribution != "Kali"
   tags:
     - install
     - playwright
