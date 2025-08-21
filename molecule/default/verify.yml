@@ -1,0 +1,20 @@
+- name: Test playwright attackm8 integration
+  hosts: all
+  tasks:
+    - name: Copy playwrighttest.yml
+      copy:
+        src: files/playwrighttest.yml
+        dest: /root/playwrighttest.yml
+    - name: Execute attackm8 playwrighttest.yml
+      command: attackm8 playwrighttest.yml
+      args:
+        chdir: /root
+      environment:
+        PLAYWRIGHT_BROWSERS_PATH: "/usr/local/share/attackmate/ms-playwright"
+      register: attackm8_result
+      ignore_errors: false 
+    - name: Show attackm8 output
+      debug:
+        msg: |
+          {{ attackm8_result.stdout }}
+          {{ attackm8_result.stderr }}
