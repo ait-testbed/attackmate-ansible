@@ -14,18 +14,12 @@
 - name: Install system dependencies for Playwright
   become: true
   ansible.builtin.package:
-    name: "{{ playwright_dependencies[ansible_distribution | lower][(ansible_distribution_version if ansible_distribution == 'Ubuntu' else ansible_distribution_major_version if ansible_distribution == 'Debian' else 'rolling')] }}"
+    name: "{{ playwright_dependencies }}"
     state: present
   when: attackmate_playwright
   tags:
     - install
     - playwright
-
-#- name: Install Playwright browser dependencies for current OS/version
-#  apt:
-#    name: "{{ playwright_dependencies[ansible_distribution | lower][(ansible_distribution_version if ansible_distribution == 'Ubuntu' else ansible_distribution_major_version if ansible_distribution == 'Debian' else 'rolling')] }}"
-#    state: present
-#    update_cache: yes
 
 # Install the Python Playwright package into our virtualenv using uv
 - name: Install Playwright Python package in venv (uv)

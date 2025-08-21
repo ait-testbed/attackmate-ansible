@@ -1,0 +1,17 @@
+playwright_dependencies:
+      - libasound2t64
+      - libnss3
+      - libnspr4
+      - libglib2.0-0
+      - libdbus-1-3
+      - libatk1.0-0
+      - libatk-bridge2.0-0
+      - libatspi2.0-0
+      - libxcomposite1
+      - libxdamage1
+      - libxfixes3
+      - libxrandr2
+      - libgbm1
+      - libxkbcommon0
+
+grpc_patch_url:  "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_version }}/{{ ansible_architecture }}/current"

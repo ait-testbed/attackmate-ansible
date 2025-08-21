@@ -1,15 +1,3 @@
-- name: Set grpc_patch_url for current OS/version
-  set_fact:
-    grpc_patch_url: >-
-      {{
-        grpc_patch_url[ansible_distribution | lower][
-          (ansible_distribution_version if ansible_distribution == 'Ubuntu' else
-           ansible_distribution_major_version if ansible_distribution == 'Debian' else
-           'rolling')
-        ]
-      }}
-  when: grpc_patch_url[ansible_distribution | lower] is defined
-
 - name: Download the 'current' file containing the .whl URL
   ansible.builtin.get_url:
     url: "{{ grpc_patch_url }}" # This should be the URL to the 'current' file, e.g., https://aecidimages.ait.ac.at/EXTRA/grpc/debian/12/x86_64/current

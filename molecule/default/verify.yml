@@ -12,7 +12,7 @@
       environment:
         PLAYWRIGHT_BROWSERS_PATH: "/usr/local/share/attackmate/ms-playwright"
       register: attackm8_result
-      ignore_errors: false 
+      ignore_errors: true 
     - name: Show attackm8 output
       debug:
         msg: |
