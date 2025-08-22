@@ -5,27 +5,31 @@ dependency:
 driver:
   name: docker
 platforms:
- - name: instance-kali
-   image: kalilinux/kali-rolling # Or a specific tagged version if preferred
-   ansible_user: root
-   pre_build_image: true          # Pulls image beforehand
- - name: instance-ubuntu2204
-   image: ubuntu:22.04
-   ansible_user: root
-   pre_build_image: true
- - name: instance-ubuntu2404
-   image: ubuntu:24.04
-   ansible_user: root
-   pre_build_image: true
- - name: instance-debian12
-   image: debian:12
-   ansible_user: root
-   pre_build_image: true
+  - name: instance-kali
+    image: kalilinux/kali-rolling # Or a specific tagged version if preferred
+    ansible_user: root
+    pre_build_image: true          # Pulls image beforehand
+  - name: instance-ubuntu2204
+    image: ubuntu:22.04
+    ansible_user: root
+    pre_build_image: true
+  - name: instance-ubuntu2404
+    image: ubuntu:24.04
+    ansible_user: root
+    pre_build_image: true
+  - name: instance-debian12
+    image: debian:12
+    ansible_user: root
+    pre_build_image: true
+  - name: instance-debian13
+    image: debian:13
+    ansible_user: root
+    pre_build_image: true
 provisioner:
   name: ansible
   ANSIBLE_ROLES_PATH: "/home/ubuntu/aecid_roles/"
 verifier:
-  name: ansible # Use ansible for verification tests
+  name: ansible
 scenario:
   test_sequence: # Default sequence
     - destroy # Cleans up containers
@@ -35,5 +39,5 @@ scenario:
     - prepare  # Runs prepare playbook
     - converge # Runs your role
     - idempotence # Runs your role again
-    - verify   # Runs verification playbook
+    - verify   # Runs a verification step
     - destroy  # Cleans up containers

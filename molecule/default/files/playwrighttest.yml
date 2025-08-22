@@ -1,0 +1,9 @@
+vars:
+  $URL: "https://www.github.com/"
+
+commands:
+  # Create a new named browser session called "my_session"
+  - type: browser
+    headless: true
+    cmd: visit
+    url: $URL

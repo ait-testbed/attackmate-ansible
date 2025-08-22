@@ -14,7 +14,7 @@
 - name: Install system dependencies for Playwright
   become: true
   ansible.builtin.package:
-    name: "{{ attackmate_playwright_system_packages }}"
+    name: "{{ playwright_dependencies }}"
     state: present
   when: attackmate_playwright
   tags:
@@ -34,9 +34,8 @@
     - molecule-idempotence-notest
 
 - name: Install system dependencies via playwright install-deps
-  become: true
-  ansible.builtin.command: "{{ attackmate_dest }}/.venv/bin/playwright install-deps"
-  when: attackmate_playwright and ansible_distribution != "Kali"
+  command: /usr/local/share/attackmate/.venv/bin/playwright install-deps
+  when: (ansible_distribution != "Debian" or ansible_distribution_major_version != "13") and ansible_distribution != "Kali"
   tags:
     - install
     - playwright

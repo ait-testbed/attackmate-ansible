@@ -1,4 +1,0 @@
----
-# vars file for ansible-attackmate
-grpc_download_base_url: "https://aecidimages.ait.ac.at/EXTRA/grpc"
-distribution_lower: "{{ ansible_distribution | lower }}"

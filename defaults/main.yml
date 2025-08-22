@@ -1,4 +1,3 @@
----
 # defaults file for ansible-attackmate
 attackmate_packages:
   - python3
@@ -31,12 +30,11 @@ attackmate_config_tpl: "attackmate.yml.j2"
 # attackmate_msf_server: localhost
 # attackmate_msf_passwd: hackerman
 
+#playwright
 attackmate_playwright: True
 attackmate_playwright_browser_cache: "/usr/local/share/attackmate/ms-playwright" 
-attackmate_playwright_system_packages:  # System packages required by Playwright browsers
-  - libnss3
-  - libnspr4
-  - libasound2t64
 attackmate_playwright_pip_packages:  # Python packages to install into the AttackMate venv
   - playwright
 
+grpc_download_base_url: "https://aecidimages.ait.ac.at/EXTRA/grpc"
+distribution_lower: "{{ ansible_distribution | lower }}"

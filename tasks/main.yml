@@ -1,22 +1,26 @@
 ---
+# OS/version-specific vars include 
+- name: Include Debian version-specific variables
+  include_vars: "vars/{{ distribution_lower }}{{ ansible_distribution_major_version }}.yml"
+  when: ansible_distribution == 'Debian'
+  tags:
+    - always
+
+- name: Include Ubuntu version-specific variables
+  include_vars: "vars/{{ distribution_lower }}{{ ansible_distribution_version }}.yml"
+  when: ansible_distribution == 'Ubuntu'
+  tags:
+    - always
+
+- name: Include Kali rolling-specific variables
+  include_vars: "vars/{{ distribution_lower }}.yml"
+  when: ansible_distribution == 'Kali'
+  tags:
+    - always
+
 - name: Set uv_bin variable
   set_fact:
    uv_bin: "/usr/local/bin/uv"
-
-- name: Include Debian Variables
-  include_vars: debian.yml
-  when: ansible_distribution == "Debian"
-  tags: vars
-
-- name: Include Ubuntu Variables
-  include_vars: ubuntu.yml
-  when: ansible_distribution == "Ubuntu"
-  tags: vars
-
-- name: Include Kali Variables
-  include_vars: kali.yml
-  when: ansible_distribution == "Kali"
-  tags: vars
 
 - name: Install curl
   become: true

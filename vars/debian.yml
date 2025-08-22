@@ -1,3 +1,0 @@
-grpc_patch_url: "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/current"
-attackmate_playwright_system_packages:
-  - libasound2

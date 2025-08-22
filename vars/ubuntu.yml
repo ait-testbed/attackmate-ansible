@@ -1,3 +1,0 @@
-grpc_patch_url: "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_version }}/{{ ansible_architecture }}/current"
-attackmate_playwright_system_packages:
-  - libasound2{{ 't64' if ansible_distribution_version is version('24.04', '>=') else '' }}
