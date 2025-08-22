@@ -1,5 +1,5 @@
 vars:
-  $URL: "https://www.wikipedia.org/"
+  $URL: "https://www.github.com/"
 
 commands:
   # Create a new named browser session called "my_session"
@@ -7,32 +7,3 @@ commands:
     headless: true
     cmd: visit
     url: $URL
-    creates_session: my_session
-
-  # Reuse the existing "my_session" to type text into an input field
-  - type: browser
-    headless: true
-    cmd: type
-    selector: "input[id='searchInput']"
-    text: "Test"
-    session: "my_session"
-
-  # Click on the "submit" button, still reusing "my_session"
-  - type: browser
-    headless: true
-    cmd: click
-    selector: "button[type='submit']"
-    session: "my_session"
-
-  # Take a screenshot of the current page in the "my_session"
-  - type: browser
-    headless: true
-    cmd: screenshot
-    screenshot_path: "example.png"
-    session: "my_session"
-
-  # Open a page in an ephemeral session (automatically closed)
-  - type: browser
-    headless: true
-    cmd: visit
-    url: "https://www.google.com"
