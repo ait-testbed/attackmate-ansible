@@ -36,6 +36,7 @@ It is further possible to roll out playbooks.
 
 ## Example Playbook
 
+
 ```yaml
 - name: Install attackmate
   become: true
