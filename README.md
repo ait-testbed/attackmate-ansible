@@ -33,6 +33,7 @@ It is further possible to roll out playbooks.
 | attackmate_msf_passwd          | password | **None** | Password for the Metasploit rpcd. (only needed for msf-commands) |
 | attackmate_playwright          | bool         | True | Whether to install Playwright and its dependencies |
 | command_delay                  | float | **None** | delay in seconds before commands for the CommandConfig |
+| attackmate_remote_config | dict | {} | Optional map of named remote AttackMate connections. Each entry requires url, username, password, and optionally cafile. If empty, no remote_config section is written to the config file. |
 
 ## Example Playbook
 
@@ -51,6 +52,12 @@ It is further possible to roll out playbooks.
           - upgradeshell.j2
           - attackchain.j2
         command_delay: 2
+        attackmate_remote_config:
+          primary_node:
+            url: "https://10.0.0.5:5000"
+            username: admin
+            password: securepassword
+            cafile: "/path/to/cert.pem"
 ```
 
 This role installs to executables:
