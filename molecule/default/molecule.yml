@@ -28,7 +28,6 @@ platforms:
 provisioner:
   name: ansible
   env:
-    ANSIBLE_ROLES_PATH: "/home/ubuntu/aecid_roles/"
     ANSIBLE_ALLOW_BROKEN_CONDITIONALS: "True"
 verifier:
   name: ansible
