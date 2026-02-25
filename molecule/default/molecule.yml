@@ -27,7 +27,8 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
-  ANSIBLE_ROLES_PATH: "/home/ubuntu/aecid_roles/"
+  env:
+    ANSIBLE_ALLOW_BROKEN_CONDITIONALS: "True"
 verifier:
   name: ansible
 scenario:

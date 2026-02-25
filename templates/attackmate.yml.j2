@@ -21,3 +21,16 @@ msf_config:
 cmd_config:
   command_delay: {{ command_delay }}
 {% endif %}
+
+{% if attackmate_remote_config %}
+remote_config:
+{% for name, conn in attackmate_remote_config.items() %}
+  {{ name }}:
+    url: "{{ conn.url }}"
+    username: {{ conn.username }}
+    password: {{ conn.password }}
+{% if conn.cafile is defined %}
+    cafile: "{{ conn.cafile }}"
+{% endif %}
+{% endfor %}
+{% endif %}
