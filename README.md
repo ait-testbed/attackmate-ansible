@@ -14,26 +14,30 @@ It is further possible to roll out playbooks.
 
 | Variable name                  | Type         | Default                                   | Description                                              |
 | ------------------------------ | ------------ | ----------------------------------------- | -------------------------------------------------------- |
-| attackmate_url                 | url          | https://github.com/ait-aecid/attackmate.git | Official attackmate repository |
-| attackmate_version             | version-str  | main | Version/Branch of the Git-Repository in attackmate_url |
-| attackmate_shared_dir          | path         | /usr/local/share | Installation path |
-| attackmate_dest                | path         | `{{ attackmate_shared_dir }}/attackmate` | Installation path of the attackmate repository |
-| attackmate_sliverfix           | bool         | True | [Install sliver-fix](https://aeciddocs.ait.ac.at/attackmate/development/installation/sliverfix.html#sliver-fix) |
-| attackmate_grpc_dest           | path | `{{ attackmate_shared_dir }}/grpc` | Temporary install grpc to this path if sliverfix is enabled |
-| attackmate_bindir              | path | /usr/local/bin | Installpath for the tmux-wrapper |
-| attackmate_tmux                | bool | True | Deploy tmux-wrapper |
-| attackmate_tmux_session        | str  | attackmate | Use this existing session-name for the tmux-wrapper |
-| attackmate_tmux_window         | str  | attackmate | The name of the tmux-window for attackmate |
-| attackmate_config_dir          | path | /etc/attackmate | Path to the config-directory |
-| attackmate_playbook_path       | path | `{{ attackmate_config_dir }}/playbooks` | Path to the playbooks-directory |
-| attackmate_playbooks           | list of playbook-templates(j2) | `[]` | List of playbooks to deploy |
-| attackmate_config_tpl          | str  | attackmate.yml.j2 | Name of the config-template(jinja) |
-| attackmate_sliver_config       | path | **None** | Path to the generated sliver-config. (only needed for sliver-commands) |
-| attackmate_msf_server          | hostname | **None** | Hostname of the Metasploit rpcd. (only needed for msf-commands) |
-| attackmate_msf_passwd          | password | **None** | Password for the Metasploit rpcd. (only needed for msf-commands) |
-| attackmate_playwright          | bool         | True | Whether to install Playwright and its dependencies |
-| command_delay                  | float | **None** | delay in seconds before commands for the CommandConfig |
-| attackmate_remote_config | dict | {} | Optional map of named remote AttackMate connections. Each entry requires url, username, password, and optionally cafile. If empty, no remote_config section is written to the config file. |
+| attackmate_url                 | url          | https://github.com/ait-aecid/attackmate.git | Official attackmate repository                         |
+| attackmate_version             | version-str  | main | Version/Branch of the Git-Repository in attackmate_url                                        |
+| attackmate_shared_dir          | path         | /usr/local/share                          | Installation path                                        |
+| attackmate_dest                | path         | `{{ attackmate_shared_dir }}/attackmate`  | Installation path of the attackmate repository           |
+| attackmate_sliverfix           | bool         | True                                      | [Install sliver-fix](https://aeciddocs.ait.ac.at/attackmate/development/installation/sliverfix.html#sliver-fix) |
+| attackmate_grpc_dest           | path         | `{{ attackmate_shared_dir }}/grpc`        | Temporary install grpc to this path if sliverfix is enabled |
+| attackmate_bindir              | path         | /usr/local/bin                            | Installpath for the tmux-wrapper                         |
+| attackmate_tmux                | bool         | True                                      | Deploy tmux-wrapper                                      |
+| attackmate_tmux_session        | str          | attackmate                                | Use this existing session-name for the tmux-wrapper      |
+| attackmate_tmux_window         | str          | attackmate                                | The name of the tmux-window for attackmate               |
+| attackmate_config_dir          | path         | /etc/attackmate                           | Path to the config-directory                             |
+| attackmate_playbook_path       | path         | `{{ attackmate_config_dir }}/playbooks`   | Path to the playbooks-directory                          |
+| attackmate_playbooks           | list of playbook-templates(j2) | `[]`                    | List of playbooks to deploy                              |
+| attackmate_config_tpl          | str          | attackmate.yml.j2 | Name of the config-template(jinja) |
+| attackmate_sliver_config       | path         | **None**                                  | Path to the generated sliver-config. (only needed for sliver-commands) |
+| attackmate_msf_server          | hostname     | **None**                                  | Hostname of the Metasploit rpcd. (only needed for msf-commands) |
+| attackmate_msf_passwd          | password     | **None**                                  | Password for the Metasploit rpcd. (only needed for msf-commands) |
+| attackmate_playwright          | bool         | True                                      | Whether to install Playwright and its dependencies |
+| command_delay                  | float        | **None**                                  | delay in seconds before commands for the CommandConfig |
+| attackmate_remote_config       | dict         | {} | Optional map of named remote AttackMate connections. Each entry requires url, username, password, and optionally cafile. If empty, no remote_config section is written to the config file.|
+| attackmate_api_server          | bool         | False                                     | Install the attackmate-api-server |
+| attackmate_api_server_url      | url          | https://github.com/ait-testbed/attackmate-api-server.git | Repository URL for the api server |
+| attackmate_api_server_version  | version-str  | main                                      | Version/Branch of the api server repository |
+| attackmate_api_server_dest     | path         | {{ attackmate_shared_dir }}/attackmate-api-server | Installation path of the api server |
 
 ## Example Playbook
 
@@ -65,6 +69,27 @@ This role installs to executables:
 
 * **/usr/local/bin/attackm8**: a wrapper for attackmate that uses the virtual environment
 * **/usr/local/bin/attackmate-tmux**: a wrapper that executes attackmate in a tmux-session
+
+## Installing as API Server
+
+AttackMate can optionally be installed together with the [AttackMate API Server](https://github.com/ait-testbed/attackmate-api-server),
+which exposes AttackMate's functionality via a REST API and allows remote instances to be controlled over the network.
+The API server is installed into the same virtual environment as AttackMate, since it depends on it.
+
+To enable the API server, set `attackmate_api_server: True` in your playbook:
+```yaml
+- name: Install attackmate with API server
+  become: true
+  hosts: localhost
+  roles:
+    - role: attackmate
+      vars:
+        attackmate_api_server: True
+```
+
+ installs to executables:
+
+* **/usr/local/bin/attackmate-api-server**: a wrapper for attackmate that uses the virtual environment
 
 ## Role testing with molecule
 
