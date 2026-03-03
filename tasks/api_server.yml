@@ -98,10 +98,10 @@
       ATTACKMATE_CONFIG_PATH="/etc/attackmate.yml"
       WRITE_PLAYBOOK_LOGS_TO_DISK="{{ attackmate_api_logs_to_disk }}"
       LOG_DIR="{{ attackmate_api_log_dir }}"
+      # USERS='{"username": "<argon2_hash>", ...}' # You need to enter credentials here, hashed with argon2
     owner: attackmate-api
     group: attackmate-api
-    mode: '0600' # Only the API user can read the secrets
-
+    mode: '0600'
 
 
 - name: Ensure API log directory is owned by the service user
