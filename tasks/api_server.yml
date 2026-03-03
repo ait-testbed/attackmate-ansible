@@ -79,20 +79,25 @@
     regenerate: never
   notify: Restart attackmate-api
 
+- name: Generate Certificate Signing Request (CSR)
+  community.crypto.openssl_csr:
+    path: "/etc/ssl/private/attackmate.csr"
+    privatekey_path: "{{ attackmate_ssl_key_path }}"
+    common_name: "{{ ansible_host }}"
+    subject_alt_name:
+      - "IP:{{ ansible_host }}"
+      - "DNS:localhost"
+    force: false
+
 - name: Generate Self-Signed Certificate
   community.crypto.x509_certificate:
     path: "{{ attackmate_ssl_cert_path }}"
     privatekey_path: "{{ attackmate_ssl_key_path }}"
+    csr_path: "/etc/ssl/private/attackmate.csr"
     provider: selfsigned
     selfsigned_not_after: "+825d"
     selfsigned_digest: sha256
-    subject:
-      CN: "{{ ansible_host }}"
-    subject_alt_name:
-      - "IP:{{ ansible_host }}"
-      - "DNS:localhost"
-    regenerate: never
-  notify: Restart attackmate-api
+
 
 - name: Fix permissions on SSL keys for the service user
   become: true
