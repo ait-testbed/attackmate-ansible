@@ -111,6 +111,34 @@
     - { path: "{{ attackmate_ssl_key_path }}", mode: '0640' }
     - { path: "{{ attackmate_ssl_cert_path }}", mode: '0644' }
 
+# --- User hashes for .env file (Optional) ---
+
+- name: Install argon2-cffi for hash generation
+  ansible.builtin.pip:
+    name: argon2-cffi
+    state: present
+  delegate_to: localhost
+  become: false
+  when: attackmate_api_plain_users | length > 0
+
+- name: Generate argon2 hashes for API users
+  ansible.builtin.shell:
+    cmd: "python3 -c \"from argon2 import PasswordHasher; ph = PasswordHasher(); print(ph.hash('{{ item.value }}'))\""
+  loop: "{{ attackmate_api_plain_users | dict2items }}"
+  register: argon2_hashes
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  #no_log: true
+  when: attackmate_api_plain_users | length > 0
+
+- name: Build USERS json string
+  ansible.builtin.set_fact:
+    attackmate_api_users: >-
+      {{ dict(argon2_hashes.results | map(attribute='item.key') |
+      zip(argon2_hashes.results | map(attribute='stdout'))) | to_json }}
+  #no_log: true
+  when: attackmate_api_plain_users | length > 0
 
 # --- Env file ---
 
