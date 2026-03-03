@@ -4,6 +4,8 @@ ATTACKMATE_CONFIG_PATH="/etc/attackmate.yml"
 WRITE_PLAYBOOK_LOGS_TO_DISK="{{ attackmate_api_logs_to_disk }}"
 LOG_DIR="{{ attackmate_api_log_dir }}"
 ATTACKMATE_API_SERVER_PORT="{{ attackmate_api_server_port }}"
-{% if attackmate_api_users is defined %}
+{% if attackmate_api_users is defined and attackmate_api_users %}
 USERS='{{ attackmate_api_users }}'
+{% elif attackmate_api_plain_users | length == 0 %}
+# No users configured — set USERS here or re-run with attackmate_api_plain_users defined
 {% endif %}
