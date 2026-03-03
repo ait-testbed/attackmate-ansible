@@ -1,19 +1,3 @@
-- name: Git checkout attackmate-api-server
-  ansible.builtin.git:
-    repo: "{{ attackmate_api_server_url }}"
-    dest: "{{ attackmate_api_server_dest }}"
-    version: "{{ attackmate_api_server_version }}"
-  tags:
-    - molecule-idempotence-notest
-
-- name: Install attackmate-api-server with uv
-  become: true
-  ansible.builtin.shell:
-    chdir: "{{ attackmate_api_server_dest }}"
-    cmd: "uv pip install --python {{ attackmate_dest }}/.venv/bin/python ."
-  tags:
-    - molecule-idempotence-notest
-
 - name: Create dedicated API service user
   become: true
   ansible.builtin.user:
@@ -22,30 +6,46 @@
     shell: /usr/sbin/nologin
     create_home: no
 
+# --- Git checkout ---
+
+- name: Git checkout attackmate-api-server
+  ansible.builtin.git:
+    repo: "{{ attackmate_api_server_url }}"
+    dest: "{{ attackmate_api_server_dest }}"
+    version: "{{ attackmate_api_server_version }}"
+  register: attackmate_api_git
+  tags:
+    - molecule-idempotence-notest
+
+# --- Installation ---
+
+- name: Install attackmate-api-server with uv
+  become: true
+  ansible.builtin.shell:
+    chdir: "{{ attackmate_api_server_dest }}"
+    cmd: "uv pip install --python {{ attackmate_dest }}/.venv/bin/python ."
+  when: attackmate_api_git.changed
+  changed_when: true
+  tags:
+    - molecule-idempotence-notest
+  notify: Restart attackmate-api
+
 - name: Create symlink for attackmate-api-server executable
   become: true
   ansible.builtin.file:
     src: "{{ attackmate_dest }}/.venv/bin/attackmate-api"
-    dest: "/usr/local/bin/attackmate-api"
+    dest: "{{ attackmate_api_bin_path }}"
     state: link
     force: true
 
-- name: Get site-packages path from the venv
-  become: true
-  ansible.builtin.shell:
-    cmd: "{{ attackmate_dest }}/.venv/bin/python -c 'import site; print(site.getsitepackages()[0])'"
-  register: venv_site_packages
-  changed_when: false
-
-- name: Set API package destination path
-  ansible.builtin.set_fact:
-    api_package_path: "{{ venv_site_packages.stdout }}/attackmate_api_server"
 
 - name: Create API log directory
   become: true
   ansible.builtin.file:
     path: "{{ attackmate_api_log_dir }}"
     state: directory
+    owner: attackmate-api
+    group: attackmate-api
     mode: '0755'
 
 - name: Ensure SSL directories exist with correct permissions
@@ -60,6 +60,8 @@
     - { path: '/etc/ssl/private', mode: '0711' }
     - { path: '/etc/ssl/certs', mode: '0755' }
 
+# --- SSL certificate generation ---
+
 - name: Ensure OpenSSL is installed
   ansible.builtin.package:
     name: openssl
@@ -67,68 +69,62 @@
 
 - name: Generate Private Key
   community.crypto.openssl_privatekey:
-    path: "/etc/ssl/private/attackmate.key"
+    path: "{{ attackmate_ssl_key_path }}"
     type: RSA
     size: 4096
     owner: root
-    group: attackmate-api 
+    group: attackmate-api
     mode: '0640'
-
-- name: Generate Certificate Signing Request (CSR)
-  community.crypto.openssl_csr:
-    path: "/etc/ssl/private/attackmate.csr"
-    privatekey_path: "/etc/ssl/private/attackmate.key"
-    common_name: "{{ ansible_host }}"
-    subject_alt_name: "IP:{{ ansible_host }},DNS:localhost"
+    # Only regenerate if the key is absent
+    regenerate: never
+  notify: Restart attackmate-api
 
 - name: Generate Self-Signed Certificate
   community.crypto.x509_certificate:
-    path: "/etc/ssl/certs/attackmate.pem"
-    privatekey_path: "/etc/ssl/private/attackmate.key"
-    csr_path: "/etc/ssl/private/attackmate.csr"
+    path: "{{ attackmate_ssl_cert_path }}"
+    privatekey_path: "{{ attackmate_ssl_key_path }}"
     provider: selfsigned
-
-- name: Create .env file in project root
-  become: true
-  ansible.builtin.copy:
-    dest: "{{ attackmate_api_server_dest }}/.env"
-    content: |
-      SSL_KEY_PATH="/etc/ssl/private/attackmate.key"
-      SSL_CERT_PATH="/etc/ssl/certs/attackmate.pem"
-      ATTACKMATE_CONFIG_PATH="/etc/attackmate.yml"
-      WRITE_PLAYBOOK_LOGS_TO_DISK="{{ attackmate_api_logs_to_disk }}"
-      LOG_DIR="{{ attackmate_api_log_dir }}"
-      # USERS='{"username": "<argon2_hash>", ...}' # You need to enter credentials here, hashed with argon2
-    owner: attackmate-api
-    group: attackmate-api
-    mode: '0600'
-
-
-- name: Ensure API log directory is owned by the service user
-  become: true
-  ansible.builtin.file:
-    path: "{{ attackmate_api_log_dir }}"
-    state: directory
-    owner: attackmate-api
-    group: attackmate-api
-    mode: '0750'
+    selfsigned_not_after: "+825d"
+    selfsigned_digest: sha256
+    subject:
+      CN: "{{ ansible_host }}"
+    subject_alt_name:
+      - "IP:{{ ansible_host }}"
+      - "DNS:localhost"
+    regenerate: never
+  notify: Restart attackmate-api
 
 - name: Fix permissions on SSL keys for the service user
   become: true
   ansible.builtin.file:
     path: "{{ item.path }}"
     owner: root
-    group: attackmate-api # Allow the API user to read the key
+    group: attackmate-api
     mode: "{{ item.mode }}"
   loop:
-    - { path: '/etc/ssl/private', mode: '0710' } 
-    - { path: '/etc/ssl/private/attackmate.key', mode: '0640' }
-    - { path: '/etc/ssl/certs/attackmate.pem', mode: '0644' }
+    - { path: '/etc/ssl/private', mode: '0710' }
+    - { path: "{{ attackmate_ssl_key_path }}", mode: '0640' }
+    - { path: "{{ attackmate_ssl_cert_path }}", mode: '0644' }
+
+
+# --- Env file ---
+
+- name: Create .env file in project root
+  become: true
+  ansible.builtin.template:
+    src: api-env.j2
+    dest: "{{ attackmate_api_server_dest }}/.env"
+    owner: attackmate-api
+    group: attackmate-api
+    mode: '0600'
+  notify: Restart attackmate-api
+
+# --- Systemd service ---
 
 - name: Install AttackMate API Systemd service
   become: true
   ansible.builtin.copy:
-    dest: /etc/systemd/system/attackmate-api.service
+    dest: "{{ attackmate_api_service_path }}"
     content: |
       [Unit]
       Description=AttackMate API Server
@@ -138,10 +134,9 @@
       Type=simple
       User=attackmate-api
       Group=attackmate-api
-      # This tells Pydantic where to look for the .env file
       WorkingDirectory={{ attackmate_api_server_dest }}
-      ExecStart=/usr/local/bin/attackmate-api
-      Restart=always
+      ExecStart={{ attackmate_api_bin_path }}
+      Restart=on-failure
 
       NoNewPrivileges=yes
       PrivateTmp=yes
@@ -150,11 +145,12 @@
 
       [Install]
       WantedBy=multi-user.target
+  notify: Restart attackmate-api
 
 - name: Start and enable AttackMate API
   become: true
   ansible.builtin.systemd:
     name: attackmate-api
-    state: restarted
+    state: started
     enabled: yes
     daemon_reload: yes
