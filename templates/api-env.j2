@@ -1,0 +1,8 @@
+SSL_KEY_PATH="{{ attackmate_ssl_key_path }}"
+SSL_CERT_PATH="{{ attackmate_ssl_cert_path }}"
+ATTACKMATE_CONFIG_PATH="/etc/attackmate.yml"
+WRITE_PLAYBOOK_LOGS_TO_DISK="{{ attackmate_api_logs_to_disk }}"
+LOG_DIR="{{ attackmate_api_log_dir }}"
+ATTACKMATE_API_SERVER_PORT="{{ attackmate_api_server_port }}"
+USERS='{{ attackmate_api_users }}'
+{% endif %}
