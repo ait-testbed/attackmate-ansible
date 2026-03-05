@@ -6,7 +6,14 @@ It is further possible to roll out playbooks.
 
 ## Requirements
 
-- Debian or Ubuntu
+- Debian 13 
+
+- Ubuntu 24.04 
+
+- Kali Linux (Rolling)
+
+
+Note on gRPC: To ensure high performance and fast deployment, pre-compiled Python wheels (.whl) for grpc are automatically fetched by the role from our internal image server for the distributions listed above. For other operating systems, the role will fallback to compiling gRPC locally, which may significantly increase the initial setup time.
 
 (Currently there are no packages defined for RedHat distributions)
 
