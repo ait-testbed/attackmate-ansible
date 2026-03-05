@@ -1,6 +1,11 @@
+- name: Get Python version cp-tag from attackmate venv
+  ansible.builtin.shell:
+    cmd: "{{ attackmate_dest }}/.venv/bin/python -c \"import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')\""
+  register: cp_tag
+
 - name: Download the 'current' file containing the .whl URL
   ansible.builtin.get_url:
-    url: "{{ grpc_patch_url }}" # This should be the URL to the 'current' file, e.g., https://aecidimages.ait.ac.at/EXTRA/grpc/debian/12/x86_64/current
+    url: "{{ grpc_patch_url }}/{{ cp_tag.stdout }}/current" # This is the URL to the 'current' file, e.g., https://aecidimages.ait.ac.at/EXTRA/grpc/debian/13/x86_64/cp312/current
     dest: "/tmp/current"
     mode: '0644'
   register: download_result
@@ -9,14 +14,6 @@
     - install
     - pip
     - grpc
-
-- name: Inspect HTTP Headers for caching logic
-  ansible.builtin.debug:
-    msg: 
-      - "Status Code: {{ download_result.status_code }}"
-      - "ETag: {{ download_result.etag | default('Not Present') }}"
-      - "Last-Modified: {{ download_result.last_modified | default('Not Present') }}"
-      - "Full Response: {{ download_result }}"
 
 - name: Read the .whl URL from the 'current' file
   ansible.builtin.slurp:
