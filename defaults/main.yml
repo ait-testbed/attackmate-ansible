@@ -51,4 +51,22 @@ distribution_lower: "{{ ansible_distribution | lower }}"
 #     username: user
 #     password: anotherpassword
 #     cafile: "/path/to/another_cert.pem"
+
+# If no Remote AttackMate connections configured set to empty dict
 attackmate_remote_config: {}
+
+# Installation as api server
+attackmate_api_server: False
+attackmate_api_server_url: "https://github.com/ait-testbed/attackmate-api-server.git"
+attackmate_api_server_version: "main"
+attackmate_api_server_dest: "{{ attackmate_shared_dir }}/attackmate-api-server"
+
+attackmate_api_logs_to_disk: False
+attackmate_api_log_dir: "/var/log/attackmate-api"
+
+attackmate_api_bin_path: "/usr/local/bin/attackmate-api"
+attackmate_api_service_path: "/etc/systemd/system/attackmate-api.service"
+attackmate_ssl_key_path: "/etc/ssl/private/attackmate.key"
+attackmate_ssl_cert_path: "/etc/ssl/certs/attackmate.pem"
+attackmate_api_server_port: 8445
+attackmate_api_plain_users: {}

@@ -9,16 +9,8 @@ platforms:
     image: kalilinux/kali-rolling # Or a specific tagged version if preferred
     ansible_user: root
     pre_build_image: true          # Pulls image beforehand
-  - name: instance-ubuntu2204
-    image: ubuntu:22.04
-    ansible_user: root
-    pre_build_image: true
   - name: instance-ubuntu2404
     image: ubuntu:24.04
-    ansible_user: root
-    pre_build_image: true
-  - name: instance-debian12
-    image: debian:12
     ansible_user: root
     pre_build_image: true
   - name: instance-debian13

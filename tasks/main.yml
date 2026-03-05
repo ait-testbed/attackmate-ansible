@@ -156,3 +156,12 @@
       tags:
         - playwright
   when: attackmate_playwright
+
+- name: Include api_server setup
+  ansible.builtin.include_tasks:
+    file: "api_server.yml"
+    apply:
+      tags:
+        - api_server
+  when: attackmate_api_server
+

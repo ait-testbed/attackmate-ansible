@@ -1,0 +1,189 @@
+- name: Create dedicated API service user
+  become: true
+  ansible.builtin.user:
+    name: attackmate-api
+    system: yes
+    shell: /usr/sbin/nologin
+    create_home: no
+
+# --- Git checkout ---
+
+- name: Git checkout attackmate-api-server
+  ansible.builtin.git:
+    repo: "{{ attackmate_api_server_url }}"
+    dest: "{{ attackmate_api_server_dest }}"
+    version: "{{ attackmate_api_server_version }}"
+  register: attackmate_api_git
+  tags:
+    - molecule-idempotence-notest
+
+# --- Installation ---
+
+- name: Install attackmate-api-server with uv
+  become: true
+  ansible.builtin.shell:
+    chdir: "{{ attackmate_api_server_dest }}"
+    cmd: "uv pip install --python {{ attackmate_dest }}/.venv/bin/python ."
+  when: attackmate_api_git.changed
+  changed_when: true
+  tags:
+    - molecule-idempotence-notest
+  notify: Restart attackmate-api
+
+- name: Create symlink for attackmate-api-server executable
+  become: true
+  ansible.builtin.file:
+    src: "{{ attackmate_dest }}/.venv/bin/attackmate-api"
+    dest: "{{ attackmate_api_bin_path }}"
+    state: link
+    force: true
+
+
+- name: Create API log directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ attackmate_api_log_dir }}"
+    state: directory
+    owner: attackmate-api
+    group: attackmate-api
+    mode: '0755'
+
+- name: Ensure SSL directories exist with correct permissions
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: '/etc/ssl/private', mode: '0711' }
+    - { path: '/etc/ssl/certs', mode: '0755' }
+
+# --- SSL certificate generation ---
+
+- name: Ensure OpenSSL is installed
+  ansible.builtin.package:
+    name: openssl
+    state: present
+
+- name: Generate Private Key
+  community.crypto.openssl_privatekey:
+    path: "{{ attackmate_ssl_key_path }}"
+    type: RSA
+    size: 4096
+    owner: root
+    group: attackmate-api
+    mode: '0640'
+    # Only regenerate if the key is absent
+    regenerate: never
+  notify: Restart attackmate-api
+
+- name: Generate Certificate Signing Request (CSR)
+  community.crypto.openssl_csr:
+    path: "/etc/ssl/private/attackmate.csr"
+    privatekey_path: "{{ attackmate_ssl_key_path }}"
+    common_name: "{{ ansible_host }}"
+    subject_alt_name:
+      - "IP:{{ ansible_host }}"
+      - "DNS:localhost"
+    force: false
+
+- name: Generate Self-Signed Certificate
+  community.crypto.x509_certificate:
+    path: "{{ attackmate_ssl_cert_path }}"
+    privatekey_path: "{{ attackmate_ssl_key_path }}"
+    csr_path: "/etc/ssl/private/attackmate.csr"
+    provider: selfsigned
+    selfsigned_not_after: "+825d"
+    selfsigned_digest: sha256
+
+
+- name: Fix permissions on SSL keys for the service user
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: root
+    group: attackmate-api
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: '/etc/ssl/private', mode: '0710' }
+    - { path: "{{ attackmate_ssl_key_path }}", mode: '0640' }
+    - { path: "{{ attackmate_ssl_cert_path }}", mode: '0644' }
+
+# --- User hashes for .env file (Optional) ---
+
+- name: Install argon2-cffi for hash generation
+  ansible.builtin.pip:
+    name: argon2-cffi
+    state: present
+  delegate_to: localhost
+  become: false
+  when: attackmate_api_plain_users | length > 0
+
+- name: Generate argon2 hashes for API users
+  ansible.builtin.shell:
+    cmd: "python3 -c \"from argon2 import PasswordHasher; ph = PasswordHasher(); print(ph.hash('{{ item.value }}'))\""
+  loop: "{{ attackmate_api_plain_users | dict2items }}"
+  register: argon2_hashes
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  #no_log: true
+  when: attackmate_api_plain_users | length > 0
+
+- name: Build USERS json string
+  ansible.builtin.set_fact:
+    attackmate_api_users: >-
+      {{ dict(argon2_hashes.results | map(attribute='item.key') |
+      zip(argon2_hashes.results | map(attribute='stdout'))) | to_json }}
+  #no_log: true
+  when: attackmate_api_plain_users | length > 0
+
+# --- Env file ---
+
+- name: Create .env file in project root
+  become: true
+  ansible.builtin.template:
+    src: api-env.j2
+    dest: "{{ attackmate_api_server_dest }}/.env"
+    owner: attackmate-api
+    group: attackmate-api
+    mode: '0600'
+  notify: Restart attackmate-api
+
+# --- Systemd service ---
+
+- name: Install AttackMate API Systemd service
+  become: true
+  ansible.builtin.copy:
+    dest: "{{ attackmate_api_service_path }}"
+    content: |
+      [Unit]
+      Description=AttackMate API Server
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=attackmate-api
+      Group=attackmate-api
+      WorkingDirectory={{ attackmate_api_server_dest }}
+      ExecStart={{ attackmate_api_bin_path }}
+      Restart=on-failure
+
+      NoNewPrivileges=yes
+      PrivateTmp=yes
+      ProtectSystem=full
+      ProtectHome=yes
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: Restart attackmate-api
+
+- name: Start and enable AttackMate API
+  become: true
+  ansible.builtin.systemd:
+    name: attackmate-api
+    state: started
+    enabled: yes
+    daemon_reload: yes

@@ -1,0 +1,6 @@
+- name: Restart attackmate-api
+  become: true
+  ansible.builtin.systemd:
+    name: attackmate-api
+    state: restarted
+    daemon_reload: yes

@@ -3,4 +3,4 @@ playwright_dependencies:
   - libnss3
   - libnspr4
 
-grpc_patch_url: "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_version }}/{{ ansible_architecture }}/current"
+grpc_patch_url: "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_version }}/{{ ansible_architecture }}"

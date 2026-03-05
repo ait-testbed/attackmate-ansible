@@ -14,4 +14,4 @@ playwright_dependencies:
       - libgbm1
       - libxkbcommon0
 
-grpc_patch_url:  "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_version }}/{{ ansible_architecture }}/current"
+grpc_patch_url:  "{{ grpc_download_base_url }}/{{ distribution_lower }}/{{ ansible_distribution_version }}/{{ ansible_architecture }}"

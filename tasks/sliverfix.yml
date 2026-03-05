@@ -1,6 +1,11 @@
+- name: Get Python version cp-tag from attackmate venv
+  ansible.builtin.shell:
+    cmd: "{{ attackmate_dest }}/.venv/bin/python -c \"import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')\""
+  register: cp_tag
+
 - name: Download the 'current' file containing the .whl URL
   ansible.builtin.get_url:
-    url: "{{ grpc_patch_url }}" # This should be the URL to the 'current' file, e.g., https://aecidimages.ait.ac.at/EXTRA/grpc/debian/12/x86_64/current
+    url: "{{ grpc_patch_url }}/{{ cp_tag.stdout }}/current" # This is the URL to the 'current' file, e.g., https://aecidimages.ait.ac.at/EXTRA/grpc/debian/13/x86_64/cp312/current
     dest: "/tmp/current"
     mode: '0644'
   register: download_result
@@ -14,13 +19,13 @@
   ansible.builtin.slurp:
     src: "/tmp/current"
   register: current_file_content
-  when: download_result.status_code | default(404) == 200
+  when: (download_result.status_code | default(404)) | int in [200, 304]
 
 - name: Set fact with the extracted .whl URL
   ansible.builtin.set_fact:
     grpc_whl_download_url: "{{ current_file_content['content'] | b64decode | trim }}"
   when:
-    - download_result.status_code | default(404) == 200
+    - (download_result.status_code | default(404)) | int in [200, 304]
     - current_file_content.content is defined
     - current_file_content.content | b64decode | trim != '' # Ensure the content is not empty after decoding/trimming
 
@@ -45,7 +50,7 @@
   ansible.builtin.shell:
     chdir: "{{ attackmate_dest }}"
     cmd: "uv pip install --python {{ attackmate_dest }}/.venv/bin/python /tmp/{{ grpc_whl_filename }}"
-  when: download_result.status_code | default(404) == 200
+  when: (download_result.status_code | default(404)) | int in [200, 304]
   tags:
     - install
     - pip
@@ -56,7 +61,7 @@
     msg:
     - "No grpc patch available falling back to compile locally"
     - "This will take a while depending on your system"
-  when: download_result.status_code | default(403) != 200
+  when: (download_result.status_code | default(403)) | int not in [200, 304]
 
 - name: Git checkout grpc
   ansible.builtin.git:
@@ -64,7 +69,7 @@
     dest: "{{ attackmate_grpc_dest }}"
     recursive: yes
     update: yes  
-  when: download_result.status_code | default(404) != 200
+  when: (download_result.status_code | default(404)) | int not in [200, 304]
 
 - name: Install packages for sliverfix
   become: true
@@ -73,7 +78,7 @@
   tags:
     - install
     - dependencies
-  when: download_result.status_code | default(404) != 200
+  when: (download_result.status_code | default(404)) | int not in [200, 304]
 
 - name: Create virtual environment with uv
   become: true
@@ -85,7 +90,7 @@
   tags:
     - install
     - pip
-  when: download_result.status_code | default(404) != 200
+  when: (download_result.status_code | default(404)) | int not in [200, 304]
 
 - name: Install Python dependencies using uv
   ansible.builtin.shell:
@@ -95,7 +100,7 @@
     - install
     - pip
     - grpc
-  when: download_result.status_code | default(404) != 200
+  when: (download_result.status_code | default(404)) | int not in [200, 304]
 
 - name: Compile and install grpc to attackmate
   ansible.builtin.shell:
@@ -105,7 +110,7 @@
     - install
     - pip
     - grpc
-  when: download_result.status_code | default(404) != 200
+  when: (download_result.status_code | default(404)) | int not in [200, 304]
 
 - name: Remove grpc dev-files
   ansible.builtin.shell:
@@ -114,7 +119,7 @@
     - install
     - pip
     - grpc
-  when: download_result.status_code | default(404) != 200
+  when: (download_result.status_code | default(404)) | int not in [200, 304]
 
 - name: Lock sliverfix
   ansible.builtin.shell:
