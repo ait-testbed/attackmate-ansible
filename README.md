@@ -84,7 +84,7 @@ Note on gRPC: To ensure high performance and fast deployment, pre-compiled Pytho
         command_delay: 2
         attackmate_remote_config:
           primary_node:
-            url: "https://10.0.0.5:5000"
+            url: "https://10.0.0.5:8445"
             username: admin
             password: securepassword
             cafile: "/path/to/cert.pem"
