@@ -132,7 +132,7 @@
 
 - name: Test sliverfix-lock
   ansible.builtin.shell:
-    cmd: "test -e {{ attackmate_dest }}/venv/.sliverfix"
+    cmd: "test -e {{ attackmate_dest }}/.venv/.sliverfix"
   register: sliverfix_result
   failed_when: sliverfix_result.stderr == "Error"
   tags:
