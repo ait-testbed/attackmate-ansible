@@ -39,19 +39,6 @@ attackmate_playwright_pip_packages:  # Python packages to install into the Attac
 grpc_download_base_url: "https://aecidimages.ait.ac.at/EXTRA/grpc"
 distribution_lower: "{{ ansible_distribution | lower }}"
 
-# Remote AttackMate connections (optional)
-# attackmate_remote_config:
-#   remote_server:
-#     url: "https://10.0.0.5:5000"
-#     username: admin
-#     password: securepassword
-#     cafile: "/path/to/cert.pem"
-#   another_server:
-#     url: "https://10.0.0.6:5000"
-#     username: user
-#     password: anotherpassword
-#     cafile: "/path/to/another_cert.pem"
-
 # If no Remote AttackMate connections configured set to empty dict
 attackmate_remote_config: {}
 
